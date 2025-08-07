@@ -46,7 +46,7 @@ const isAuthenticated = (req: Request, res: Response, next: any) => {
 export async function registerRoutes(app: Express): Promise<Server> {
   // Session middleware
   app.use(session({
-    secret: process.env.SESSION_SECRET!,
+    secret: process.env.SESSION_SECRET || "fallback-session-secret-for-development",
     store: sessionStore,
     resave: false,
     saveUninitialized: false,
