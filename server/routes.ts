@@ -158,12 +158,24 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const batchId = randomUUID();
       const companies = [];
 
+      console.log(`Processing Excel file with ${data.length} total rows (including header)`);
+
       // Skip header row and process data
       for (let i = 1; i < data.length; i++) {
         const row = data[i] as any[];
         
-        if (row.length >= 4 && row[0] && row[1] && row[2] && row[3]) {
-          companies.push({
+        console.log(`Row ${i}:`, row);
+        
+        // Check if row has at least 4 columns and all required fields are non-empty
+        const hasRequiredFields = row && 
+          row.length >= 4 && 
+          row[0] !== undefined && row[0] !== null && String(row[0]).trim() !== '' &&
+          row[1] !== undefined && row[1] !== null && String(row[1]).trim() !== '' &&
+          row[2] !== undefined && row[2] !== null && String(row[2]).trim() !== '' &&
+          row[3] !== undefined && row[3] !== null && String(row[3]).trim() !== '';
+        
+        if (hasRequiredFields) {
+          const company = {
             userId,
             name: String(row[0]).trim(),
             applicationLink: String(row[1]).trim(),
@@ -171,9 +183,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
             jobTitle: String(row[3]).trim(),
             rowIndex: i - 1,
             uploadBatch: batchId,
-          });
+          };
+          
+          console.log(`Adding company ${i}:`, company.name);
+          companies.push(company);
+        } else {
+          console.log(`Skipping row ${i}: missing required fields`);
         }
       }
+
+      console.log(`Total companies found: ${companies.length}`);
 
       if (companies.length === 0) {
         return res.status(400).json({ message: "No valid company data found in Excel file" });

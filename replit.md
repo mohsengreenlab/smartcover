@@ -37,11 +37,12 @@ Preferred communication style: Simple, everyday language.
 - **Session Management**: Server-side sessions stored in PostgreSQL
 - **Middleware**: Custom authentication middleware protecting API routes
 - **Security**: Password hashing with bcrypt, session-based authentication
+- **Custom Prompts**: User-specific prompt templates stored in users table
 
 ## AI Integration
 - **AI Provider**: Google Gemini AI for cover letter generation
-- **API Key Management**: Supports both environment-level and user-provided API keys
-- **Template System**: Customizable prompt templates with placeholder replacement for company-specific data
+- **API Key Management**: Server-side API key only (GEMINI_API_KEY environment variable)
+- **Template System**: User-customizable prompt templates stored in database with placeholder replacement for company-specific data
 
 ## File Processing Workflow
 - **Upload**: Excel files processed in-memory with validation
