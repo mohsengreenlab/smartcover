@@ -20,6 +20,7 @@ export interface IStorage {
   getUser(id: string): Promise<User | undefined>;
   getUserByEmail(email: string): Promise<User | undefined>;
   createUser(user: InsertUser): Promise<User>;
+  updateUserCustomPrompt(userId: string, customPrompt: string): Promise<User>;
   
   // Company operations
   createCompanies(companies: InsertCompany[]): Promise<Company[]>;
@@ -50,6 +51,15 @@ export class DatabaseStorage implements IStorage {
     const [user] = await db
       .insert(users)
       .values(insertUser)
+      .returning();
+    return user;
+  }
+
+  async updateUserCustomPrompt(userId: string, customPrompt: string): Promise<User> {
+    const [user] = await db
+      .update(users)
+      .set({ customPrompt, updatedAt: new Date() })
+      .where(eq(users.id, userId))
       .returning();
     return user;
   }

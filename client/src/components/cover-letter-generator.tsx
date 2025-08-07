@@ -1,9 +1,7 @@
 import { useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Wand2, RefreshCw, Copy, ExternalLink, ArrowRight, Eye, EyeOff } from "lucide-react";
+import { Wand2, RefreshCw, Copy, ExternalLink, ArrowRight } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useMutation } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
@@ -20,21 +18,16 @@ interface Company {
 interface CoverLetterGeneratorProps {
   company: Company;
   promptTemplate: string;
-  geminiApiKey: string;
-  onApiKeyChange: (apiKey: string) => void;
   onNextCompany: () => void;
 }
 
 export default function CoverLetterGenerator({ 
   company, 
   promptTemplate, 
-  geminiApiKey, 
-  onApiKeyChange, 
   onNextCompany 
 }: CoverLetterGeneratorProps) {
   const { toast } = useToast();
   const [generatedContent, setGeneratedContent] = useState("");
-  const [showApiKey, setShowApiKey] = useState(false);
 
   const generateMutation = useMutation({
     mutationFn: async () => {
@@ -92,42 +85,6 @@ export default function CoverLetterGenerator({
 
   return (
     <div className="space-y-8">
-      {/* API Configuration Section */}
-      <Card>
-        <div className="p-6 border-b border-slate-200">
-          <h3 className="text-lg font-semibold text-slate-900">AI Configuration</h3>
-          <p className="text-sm text-slate-600 mt-1">Configure your Gemini AI API settings</p>
-        </div>
-        
-        <CardContent className="p-6">
-          <div className="max-w-md">
-            <Label htmlFor="apiKey" className="text-sm font-medium text-slate-700 mb-2">
-              Gemini API Key
-            </Label>
-            <div className="relative mt-2">
-              <Input 
-                id="apiKey"
-                type={showApiKey ? "text" : "password"}
-                className="pr-10" 
-                placeholder="Enter your Gemini API key..."
-                value={geminiApiKey}
-                onChange={(e) => onApiKeyChange(e.target.value)}
-              />
-              <Button
-                type="button"
-                variant="ghost"
-                size="sm"
-                className="absolute right-2 top-1/2 -translate-y-1/2 h-8 w-8 p-0"
-                onClick={() => setShowApiKey(!showApiKey)}
-              >
-                {showApiKey ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-              </Button>
-            </div>
-            <p className="text-xs text-slate-500 mt-2">Your API key is stored securely and never shared</p>
-          </div>
-        </CardContent>
-      </Card>
-
       {/* AI Generation Section */}
       <Card>
         <div className="p-6 border-b border-slate-200">

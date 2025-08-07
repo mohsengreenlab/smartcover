@@ -30,6 +30,7 @@ export const users = pgTable("users", {
   password: varchar("password").notNull(),
   name: varchar("name").notNull(),
   phone: varchar("phone"),
+  customPrompt: text("custom_prompt").default("My name is Max, I have over 9 years of experience as software QS/Tester. Generate a customized cover letter for {COMPANY_NAME} based on its job description: {JOB_DESCRIPTION} for the job title: {JOB_TITLE}."),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });
@@ -53,8 +54,6 @@ export const userSessions = pgTable("user_sessions", {
   userId: varchar("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
   currentBatch: varchar("current_batch"),
   currentCompanyIndex: integer("current_company_index").default(0),
-  promptTemplate: text("prompt_template").default("My name is Max, I have over 9 years of experience as software QS/Tester. Generate a customized cover letter for {COMPANY_NAME} based on its job description: {JOB_DESCRIPTION} for the job title: {JOB_TITLE}."),
-  geminiApiKey: varchar("gemini_api_key"),
   updatedAt: timestamp("updated_at").defaultNow(),
 });
 

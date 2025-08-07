@@ -212,10 +212,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       const companies = await storage.getCompaniesByBatch(userId, userSession.currentBatch);
       
+      // Get user to access custom prompt
+      const user = await storage.getUser(userId);
+      
       res.json({ 
         companies,
         currentIndex: userSession.currentCompanyIndex || 0,
-        promptTemplate: userSession.promptTemplate
+        promptTemplate: user?.customPrompt || "My name is Max, I have over 9 years of experience as software QS/Tester. Generate a customized cover letter for {COMPANY_NAME} based on its job description: {JOB_DESCRIPTION} for the job title: {JOB_TITLE}."
       });
     } catch (error) {
       console.error("Error fetching companies:", error);
@@ -227,15 +230,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.patch('/api/user-session', isAuthenticated, async (req: Request, res: Response) => {
     try {
       const userId = (req.session as any).userId;
-      const { currentCompanyIndex, promptTemplate, geminiApiKey } = req.body;
+      const { currentCompanyIndex, promptTemplate } = req.body;
 
       const updateData: any = { userId };
       
       if (currentCompanyIndex !== undefined) updateData.currentCompanyIndex = currentCompanyIndex;
-      if (promptTemplate !== undefined) updateData.promptTemplate = promptTemplate;
-      if (geminiApiKey !== undefined) updateData.geminiApiKey = geminiApiKey;
 
       const userSession = await storage.upsertUserSession(updateData);
+      
+      // If promptTemplate is provided, update it in users table
+      if (promptTemplate !== undefined) {
+        await storage.updateUserCustomPrompt(userId, promptTemplate);
+      }
       
       res.json(userSession);
     } catch (error) {
@@ -260,13 +266,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ message: "Company not found" });
       }
 
-      // Get user session for prompt template and API key
-      const userSession = await storage.getUserSession(userId);
-      if (!userSession) {
-        return res.status(404).json({ message: "User session not found" });
+      // Get user for custom prompt
+      const user = await storage.getUser(userId);
+      if (!user) {
+        return res.status(404).json({ message: "User not found" });
       }
 
-      const promptTemplate = userSession.promptTemplate || 
+      const promptTemplate = user.customPrompt || 
         "My name is Max, I have over 9 years of experience as software QS/Tester. Generate a customized cover letter for {COMPANY_NAME} based on its job description: {JOB_DESCRIPTION} for the job title: {JOB_TITLE}.";
 
       // Replace placeholders in prompt
@@ -276,8 +282,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         jobDescription: company.jobDescription,
       });
 
-      // Generate cover letter using Gemini
-      const coverLetterContent = await generateCoverLetter(populatedPrompt, userSession.geminiApiKey || undefined);
+      // Generate cover letter using Gemini (server-side API key only)
+      const coverLetterContent = await generateCoverLetter(populatedPrompt);
 
       // Save generated cover letter
       const coverLetter = await storage.createCoverLetter({

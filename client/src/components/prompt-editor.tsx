@@ -36,25 +36,6 @@ export default function PromptEditor({ template, onTemplateChange, company }: Pr
             onChange={(e) => onTemplateChange(e.target.value)}
           />
         </div>
-        
-        {/* Placeholder Legend */}
-        <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-          <h4 className="font-medium text-blue-900 mb-3">Available Placeholders:</h4>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-3 text-sm">
-            <div className="flex items-center space-x-2">
-              <code className="bg-blue-100 text-blue-800 px-2 py-1 rounded text-xs">{"{COMPANY_NAME}"}</code>
-              <span className="text-blue-700">Company name</span>
-            </div>
-            <div className="flex items-center space-x-2">
-              <code className="bg-blue-100 text-blue-800 px-2 py-1 rounded text-xs">{"{JOB_TITLE}"}</code>
-              <span className="text-blue-700">Job title</span>
-            </div>
-            <div className="flex items-center space-x-2">
-              <code className="bg-blue-100 text-blue-800 px-2 py-1 rounded text-xs">{"{JOB_DESCRIPTION}"}</code>
-              <span className="text-blue-700">Job description</span>
-            </div>
-          </div>
-        </div>
 
         {/* Preview populated prompt if company data is available */}
         {company && template && (

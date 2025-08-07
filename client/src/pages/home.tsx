@@ -32,7 +32,6 @@ export default function Home() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [promptTemplate, setPromptTemplate] = useState("");
-  const [geminiApiKey, setGeminiApiKey] = useState("");
 
   // Fetch companies data
   const { data: companiesData, isLoading } = useQuery<CompaniesData>({
@@ -41,7 +40,7 @@ export default function Home() {
 
   // Update user session mutation
   const updateSessionMutation = useMutation({
-    mutationFn: async (data: { currentCompanyIndex?: number; promptTemplate?: string; geminiApiKey?: string }) => {
+    mutationFn: async (data: { currentCompanyIndex?: number; promptTemplate?: string }) => {
       const response = await apiRequest("PATCH", "/api/user-session", data);
       return response.json();
     },
@@ -103,11 +102,6 @@ export default function Home() {
   const handlePromptTemplateChange = (newTemplate: string) => {
     setPromptTemplate(newTemplate);
     updateSessionMutation.mutate({ promptTemplate: newTemplate });
-  };
-
-  const handleApiKeyChange = (newApiKey: string) => {
-    setGeminiApiKey(newApiKey);
-    updateSessionMutation.mutate({ geminiApiKey: newApiKey });
   };
 
   const currentCompany = companiesData?.companies[companiesData.currentIndex];
@@ -182,8 +176,6 @@ export default function Home() {
               <CoverLetterGenerator 
                 company={currentCompany}
                 promptTemplate={promptTemplate}
-                geminiApiKey={geminiApiKey}
-                onApiKeyChange={handleApiKeyChange}
                 onNextCompany={handleNextCompany}
               />
             )}
