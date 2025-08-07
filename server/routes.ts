@@ -149,7 +149,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const workbook = XLSX.read(req.file.buffer, { type: 'buffer' });
       const sheetName = workbook.SheetNames[0];
       const worksheet = workbook.Sheets[sheetName];
-      const data = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
+      
+      console.log('Excel file sheet names:', workbook.SheetNames);
+      console.log('Selected sheet:', sheetName);
+      
+      // Try different parsing methods to handle various Excel formats
+      const data = XLSX.utils.sheet_to_json(worksheet, { 
+        header: 1, 
+        defval: '',
+        blankrows: false,
+        raw: false 
+      });
 
       if (data.length < 2) {
         return res.status(400).json({ message: "Excel file must contain at least one data row" });
@@ -159,20 +169,43 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const companies = [];
 
       console.log(`Processing Excel file with ${data.length} total rows (including header)`);
+      
+      // Log the header row
+      if (data.length > 0) {
+        console.log('Header row:', data[0]);
+      }
 
       // Skip header row and process data
       for (let i = 1; i < data.length; i++) {
         const row = data[i] as any[];
         
         console.log(`Row ${i}:`, row);
+        console.log(`Row ${i} length:`, row ? row.length : 0);
+        
+        // Check if row exists and has content
+        if (!row || row.length === 0) {
+          console.log(`Skipping row ${i}: empty row`);
+          continue;
+        }
         
         // Check if row has at least 4 columns and all required fields are non-empty
-        const hasRequiredFields = row && 
-          row.length >= 4 && 
+        const hasRequiredFields = row.length >= 4 && 
           row[0] !== undefined && row[0] !== null && String(row[0]).trim() !== '' &&
           row[1] !== undefined && row[1] !== null && String(row[1]).trim() !== '' &&
           row[2] !== undefined && row[2] !== null && String(row[2]).trim() !== '' &&
           row[3] !== undefined && row[3] !== null && String(row[3]).trim() !== '';
+        
+        console.log(`Row ${i} has required fields:`, hasRequiredFields);
+        console.log(`Row ${i} individual fields:`, {
+          field0: row[0], 
+          field0Valid: row[0] !== undefined && row[0] !== null && String(row[0]).trim() !== '',
+          field1: row[1],
+          field1Valid: row[1] !== undefined && row[1] !== null && String(row[1]).trim() !== '',
+          field2: row[2] ? String(row[2]).substring(0, 50) + '...' : row[2],
+          field2Valid: row[2] !== undefined && row[2] !== null && String(row[2]).trim() !== '',
+          field3: row[3],
+          field3Valid: row[3] !== undefined && row[3] !== null && String(row[3]).trim() !== ''
+        });
         
         if (hasRequiredFields) {
           const company = {
@@ -188,7 +221,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           console.log(`Adding company ${i}:`, company.name);
           companies.push(company);
         } else {
-          console.log(`Skipping row ${i}: missing required fields`);
+          console.log(`Skipping row ${i}: missing required fields. Row data:`, row.map(cell => typeof cell === 'string' ? cell.substring(0, 20) + '...' : cell));
         }
       }
 
