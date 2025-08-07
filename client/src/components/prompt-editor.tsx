@@ -103,15 +103,15 @@ export default function PromptEditor({ template, onTemplateChange, onSaveTemplat
 
   return (
     <Card>
-      <div className="p-6 border-b border-slate-200">
-        <h3 className="text-lg font-semibold text-slate-900">Customize Your Prompt Template</h3>
-        <p className="text-sm text-slate-600 mt-1">Edit the prompt template that will be sent to AI. Placeholders will be automatically replaced with company data.</p>
+      <div className="p-6 border-b-2 border-accent/30 bg-secondary/10 dark:bg-secondary/5">
+        <h3 className="text-lg font-semibold text-foreground">Customize Your Prompt Template</h3>
+        <p className="text-sm text-muted-foreground mt-1">Edit the prompt template that will be sent to AI. Placeholders will be automatically replaced with company data.</p>
       </div>
       
       <CardContent className="p-6">
         <div className="mb-4">
           <div className="flex items-center justify-between mb-2">
-            <Label htmlFor="promptTemplate" className="text-sm font-medium text-slate-700">
+            <Label htmlFor="promptTemplate" className="text-sm font-medium text-foreground">
               AI Prompt Template
             </Label>
             <div className="flex items-center gap-2">
@@ -154,15 +154,15 @@ export default function PromptEditor({ template, onTemplateChange, onSaveTemplat
                               </Button>
                             </div>
                           </div>
-                          <div className="bg-slate-50 rounded p-3">
-                            <p className="text-sm text-slate-600 line-clamp-3">
+                          <div className="bg-muted/50 rounded p-3">
+                            <p className="text-sm text-muted-foreground line-clamp-3">
                               {savedTemplate.template}
                             </p>
                           </div>
                         </div>
                       ))
                     ) : (
-                      <div className="text-center py-8 text-slate-500">
+                      <div className="text-center py-8 text-muted-foreground">
                         No saved templates found. Save your first template to get started!
                       </div>
                     )}
@@ -192,9 +192,9 @@ export default function PromptEditor({ template, onTemplateChange, onSaveTemplat
                         className="mt-1"
                       />
                     </div>
-                    <div className="bg-slate-50 rounded p-3">
-                      <Label className="text-sm font-medium text-slate-700">Template Preview:</Label>
-                      <p className="text-sm text-slate-600 mt-1 line-clamp-4">
+                    <div className="bg-muted/50 rounded p-3">
+                      <Label className="text-sm font-medium text-foreground">Template Preview:</Label>
+                      <p className="text-sm text-muted-foreground mt-1 line-clamp-4">
                         {template}
                       </p>
                     </div>
@@ -233,9 +233,9 @@ export default function PromptEditor({ template, onTemplateChange, onSaveTemplat
         {/* Preview populated prompt if company data is available */}
         {company && template && (
           <div className="mt-4">
-            <Label className="text-sm font-medium text-slate-700 mb-2">Preview (with current company data):</Label>
-            <div className="bg-slate-100 rounded-lg p-4 mt-2">
-              <p className="text-sm text-slate-800 leading-relaxed">
+            <Label className="text-sm font-medium text-foreground mb-2">Preview (with current company data):</Label>
+            <div className="bg-muted/30 border border-accent/20 rounded-lg p-4 mt-2">
+              <p className="text-sm text-foreground leading-relaxed">
                 {template
                   .replace(/{COMPANY_NAME}/g, company.name)
                   .replace(/{JOB_TITLE}/g, company.jobTitle)
