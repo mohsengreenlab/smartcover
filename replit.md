@@ -37,6 +37,7 @@ Preferred communication style: Simple, everyday language.
 - **Session Management**: Server-side sessions stored in PostgreSQL
 - **Middleware**: Custom authentication middleware protecting API routes
 - **Security**: Password hashing with bcrypt, session-based authentication
+- **Captcha Protection**: Math-based captcha system on login and registration pages
 - **Custom Prompts**: User-specific prompt templates stored in users table
 
 ## AI Integration

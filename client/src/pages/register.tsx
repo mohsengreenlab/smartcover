@@ -1,9 +1,9 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { UserPlus, Eye, EyeOff, Shield } from "lucide-react";
+import { UserPlus, Eye, EyeOff, Shield, RefreshCw } from "lucide-react";
 import { Link, useLocation } from "wouter";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
@@ -19,9 +19,45 @@ export default function Register() {
     phone: "",
     password: "",
   });
+  const [captcha, setCaptcha] = useState({ num1: 0, num2: 0, answer: 0 });
+  const [captchaInput, setCaptchaInput] = useState("");
+  const [captchaValid, setCaptchaValid] = useState(false);
+
+  // Generate new captcha
+  const generateCaptcha = () => {
+    const num1 = Math.floor(Math.random() * 10) + 1;
+    const num2 = Math.floor(Math.random() * 10) + 1;
+    const answer = num1 + num2;
+    setCaptcha({ num1, num2, answer });
+    setCaptchaInput("");
+    setCaptchaValid(false);
+  };
+
+  // Initialize captcha on component mount
+  useEffect(() => {
+    generateCaptcha();
+  }, []);
+
+  // Validate captcha input
+  useEffect(() => {
+    const inputNumber = parseInt(captchaInput);
+    setCaptchaValid(!isNaN(inputNumber) && inputNumber === captcha.answer);
+  }, [captchaInput, captcha.answer]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    // Validate captcha before proceeding
+    if (!captchaValid) {
+      toast({
+        title: "Captcha Error",
+        description: "Please solve the captcha correctly",
+        variant: "destructive",
+      });
+      generateCaptcha(); // Generate new captcha on failure
+      return;
+    }
+
     try {
       await register(formData);
       toast({
@@ -35,6 +71,7 @@ export default function Register() {
         description: error instanceof Error ? error.message : "Registration failed",
         variant: "destructive",
       });
+      generateCaptcha(); // Generate new captcha on registration failure
     }
   };
 
@@ -123,16 +160,46 @@ export default function Register() {
               </div>
             </div>
 
-            {/* Simple captcha placeholder */}
-            <div className="bg-slate-100 border-2 border-dashed border-slate-300 rounded-lg p-4 text-center">
-              <Shield className="text-slate-400 w-8 h-8 mx-auto mb-2" />
-              <p className="text-sm text-slate-500">Captcha verification placeholder</p>
+            {/* Captcha verification */}
+            <div className="space-y-2">
+              <Label htmlFor="captcha" className="text-sm font-medium text-foreground">
+                Security Verification
+              </Label>
+              <div className="bg-muted/30 border-2 border-accent/20 rounded-lg p-4">
+                <div className="flex items-center justify-between mb-3">
+                  <div className="flex items-center space-x-2">
+                    <Shield className="text-primary w-5 h-5" />
+                    <span className="text-lg font-mono font-semibold text-foreground">
+                      {captcha.num1} + {captcha.num2} = ?
+                    </span>
+                  </div>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={generateCaptcha}
+                    className="h-8 w-8 p-0"
+                  >
+                    <RefreshCw className="h-4 w-4" />
+                  </Button>
+                </div>
+                <Input
+                  id="captcha"
+                  type="number"
+                  placeholder="Enter the sum"
+                  value={captchaInput}
+                  onChange={(e) => setCaptchaInput(e.target.value)}
+                  className={`${
+                    captchaInput && (captchaValid ? "border-green-500" : "border-red-500")
+                  }`}
+                />
+              </div>
             </div>
 
             <Button 
               type="submit" 
               className="w-full bg-primary hover:bg-blue-700"
-              disabled={isRegisterPending}
+              disabled={isRegisterPending || !captchaValid}
             >
               {isRegisterPending ? "Creating Account..." : "Create Account"}
             </Button>
