@@ -122,7 +122,24 @@ export default function Home() {
 
   const handlePromptTemplateChange = (newTemplate: string) => {
     setPromptTemplate(newTemplate);
-    updateSessionMutation.mutate({ promptTemplate: newTemplate });
+  };
+
+  const handleSavePromptTemplate = (template: string) => {
+    updateSessionMutation.mutate({ promptTemplate: template }, {
+      onSuccess: () => {
+        toast({
+          title: "Success",
+          description: "Custom prompt template saved successfully",
+        });
+      },
+      onError: () => {
+        toast({
+          title: "Error",
+          description: "Failed to save prompt template",
+          variant: "destructive",
+        });
+      }
+    });
   };
 
   const handlePreviousCompany = () => {
@@ -226,7 +243,9 @@ export default function Home() {
             <PromptEditor 
               template={promptTemplate}
               onTemplateChange={handlePromptTemplateChange}
+              onSaveTemplate={handleSavePromptTemplate}
               company={currentCompany}
+              isSaving={updateSessionMutation.isPending}
             />
 
             {/* AI Generation Section */}

@@ -14,12 +14,12 @@ export async function generateCoverLetter(prompt: string, userApiKey?: string): 
     }
 
     // Log minimal info for debugging
-    console.log("Generating cover letter with model: gemini-1.5-flash");
+    console.log("Generating cover letter with model: gemini-2.5-flash");
 
     const geminiAI = new GoogleGenAI({ apiKey });
 
     const response = await geminiAI.models.generateContent({
-      model: "gemini-1.5-flash",
+      model: "gemini-2.5-flash",
       contents: prompt,
     });
 

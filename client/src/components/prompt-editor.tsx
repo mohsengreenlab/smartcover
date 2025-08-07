@@ -1,6 +1,8 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
+import { Button } from "@/components/ui/button";
+import { Save, RefreshCw } from "lucide-react";
 
 interface Company {
   name: string;
@@ -11,10 +13,12 @@ interface Company {
 interface PromptEditorProps {
   template: string;
   onTemplateChange: (template: string) => void;
+  onSaveTemplate: (template: string) => void;
   company?: Company;
+  isSaving?: boolean;
 }
 
-export default function PromptEditor({ template, onTemplateChange, company }: PromptEditorProps) {
+export default function PromptEditor({ template, onTemplateChange, onSaveTemplate, company, isSaving }: PromptEditorProps) {
   return (
     <Card>
       <div className="p-6 border-b border-slate-200">
@@ -24,9 +28,20 @@ export default function PromptEditor({ template, onTemplateChange, company }: Pr
       
       <CardContent className="p-6">
         <div className="mb-4">
-          <Label htmlFor="promptTemplate" className="text-sm font-medium text-slate-700 mb-2">
-            AI Prompt Template
-          </Label>
+          <div className="flex items-center justify-between mb-2">
+            <Label htmlFor="promptTemplate" className="text-sm font-medium text-slate-700">
+              AI Prompt Template
+            </Label>
+            <Button 
+              size="sm" 
+              onClick={() => onSaveTemplate(template)}
+              disabled={isSaving}
+              className="flex items-center gap-2"
+            >
+              {isSaving ? <RefreshCw className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
+              {isSaving ? "Saving..." : "Save Template"}
+            </Button>
+          </div>
           <Textarea 
             id="promptTemplate"
             rows={6} 
