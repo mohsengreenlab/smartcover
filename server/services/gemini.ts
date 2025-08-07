@@ -13,10 +13,13 @@ export async function generateCoverLetter(prompt: string, userApiKey?: string): 
       throw new Error("No Gemini API key available. Please provide an API key.");
     }
 
+    // Log minimal info for debugging
+    console.log("Generating cover letter with model: gemini-1.5-flash");
+
     const geminiAI = new GoogleGenAI({ apiKey });
 
     const response = await geminiAI.models.generateContent({
-      model: "gemini-2.5-flash",
+      model: "gemini-1.5-flash",
       contents: prompt,
     });
 
@@ -29,7 +32,7 @@ export async function generateCoverLetter(prompt: string, userApiKey?: string): 
     return generatedText;
   } catch (error) {
     console.error("Error generating cover letter:", error);
-    throw new Error(`Failed to generate cover letter: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    throw new Error(`Failed to generate cover letter: ${JSON.stringify(error)}`);
   }
 }
 
