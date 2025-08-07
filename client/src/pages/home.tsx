@@ -84,13 +84,34 @@ export default function Home() {
 
   const handleFileUpload = () => {
     queryClient.invalidateQueries({ queryKey: ["/api/companies"] });
+    toast({
+      title: "Success",
+      description: "Excel file uploaded successfully",
+    });
   };
 
   const handleNextCompany = () => {
     if (companiesData && companiesData.currentIndex < companiesData.companies.length - 1) {
       const newIndex = companiesData.currentIndex + 1;
-      updateSessionMutation.mutate({ currentCompanyIndex: newIndex });
-      queryClient.invalidateQueries({ queryKey: ["/api/companies"] });
+      updateSessionMutation.mutate(
+        { currentCompanyIndex: newIndex },
+        {
+          onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ["/api/companies"] });
+            toast({
+              title: "Success",
+              description: `Moved to company ${newIndex + 1} of ${companiesData.companies.length}`,
+            });
+          },
+          onError: (error) => {
+            toast({
+              title: "Error",
+              description: "Failed to move to next company",
+              variant: "destructive",
+            });
+          }
+        }
+      );
     } else {
       toast({
         title: "Completed",
@@ -102,6 +123,41 @@ export default function Home() {
   const handlePromptTemplateChange = (newTemplate: string) => {
     setPromptTemplate(newTemplate);
     updateSessionMutation.mutate({ promptTemplate: newTemplate });
+  };
+
+  const handlePreviousCompany = () => {
+    if (companiesData && companiesData.currentIndex > 0) {
+      const newIndex = companiesData.currentIndex - 1;
+      updateSessionMutation.mutate(
+        { currentCompanyIndex: newIndex },
+        {
+          onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ["/api/companies"] });
+            toast({
+              title: "Success",
+              description: `Moved to company ${newIndex + 1} of ${companiesData.companies.length}`,
+            });
+          }
+        }
+      );
+    }
+  };
+
+  const handleGoToCompany = (index: number) => {
+    if (companiesData && index >= 0 && index < companiesData.companies.length) {
+      updateSessionMutation.mutate(
+        { currentCompanyIndex: index },
+        {
+          onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ["/api/companies"] });
+            toast({
+              title: "Success",
+              description: `Moved to company ${index + 1} of ${companiesData.companies.length}`,
+            });
+          }
+        }
+      );
+    }
   };
 
   const currentCompany = companiesData?.companies[companiesData.currentIndex];
@@ -157,6 +213,8 @@ export default function Home() {
             <ProgressIndicator 
               currentIndex={companiesData.currentIndex}
               totalCompanies={companiesData.companies.length}
+              onPreviousCompany={handlePreviousCompany}
+              onNextCompany={handleNextCompany}
             />
 
             {/* Current Company Information */}
