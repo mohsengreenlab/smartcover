@@ -6,6 +6,7 @@ import { FileText, User, LogOut } from "lucide-react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import { isUnauthorizedError } from "@/lib/authUtils";
+import { useLocation } from "wouter";
 import FileUpload from "@/components/file-upload";
 import ProgressIndicator from "@/components/progress-indicator";
 import CompanyCard from "@/components/company-card";
@@ -31,6 +32,7 @@ export default function Home() {
   const { user, logout } = useAuth();
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const [, setLocation] = useLocation();
   const [promptTemplate, setPromptTemplate] = useState("");
 
   // Fetch companies data
@@ -73,6 +75,8 @@ export default function Home() {
         title: "Success",
         description: "Logged out successfully",
       });
+      // Redirect to main page after logout
+      setLocation("/");
     } catch (error) {
       toast({
         title: "Error",
