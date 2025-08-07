@@ -3,6 +3,7 @@ import {
   companies,
   userSessions,
   coverLetters,
+  promptTemplates,
   type User,
   type InsertUser,
   type Company,
@@ -11,6 +12,8 @@ import {
   type InsertUserSession,
   type CoverLetter,
   type InsertCoverLetter,
+  type PromptTemplate,
+  type InsertPromptTemplate,
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, and, desc } from "drizzle-orm";
@@ -34,6 +37,13 @@ export interface IStorage {
   // Cover letter operations
   createCoverLetter(coverLetter: InsertCoverLetter): Promise<CoverLetter>;
   getCoverLettersByUser(userId: string): Promise<CoverLetter[]>;
+  
+  // Prompt template operations
+  createPromptTemplate(template: InsertPromptTemplate): Promise<PromptTemplate>;
+  getPromptTemplatesByUser(userId: string): Promise<PromptTemplate[]>;
+  getPromptTemplate(id: string): Promise<PromptTemplate | undefined>;
+  updatePromptTemplate(id: string, template: Partial<InsertPromptTemplate>): Promise<PromptTemplate>;
+  deletePromptTemplate(id: string): Promise<void>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -126,6 +136,45 @@ export class DatabaseStorage implements IStorage {
       .from(coverLetters)
       .where(eq(coverLetters.userId, userId))
       .orderBy(desc(coverLetters.createdAt));
+  }
+
+  async createPromptTemplate(templateData: InsertPromptTemplate): Promise<PromptTemplate> {
+    const [template] = await db
+      .insert(promptTemplates)
+      .values(templateData)
+      .returning();
+    return template;
+  }
+
+  async getPromptTemplatesByUser(userId: string): Promise<PromptTemplate[]> {
+    return await db
+      .select()
+      .from(promptTemplates)
+      .where(eq(promptTemplates.userId, userId))
+      .orderBy(desc(promptTemplates.createdAt));
+  }
+
+  async getPromptTemplate(id: string): Promise<PromptTemplate | undefined> {
+    const [template] = await db
+      .select()
+      .from(promptTemplates)
+      .where(eq(promptTemplates.id, id));
+    return template;
+  }
+
+  async updatePromptTemplate(id: string, updateData: Partial<InsertPromptTemplate>): Promise<PromptTemplate> {
+    const [template] = await db
+      .update(promptTemplates)
+      .set({ ...updateData, updatedAt: new Date() })
+      .where(eq(promptTemplates.id, id))
+      .returning();
+    return template;
+  }
+
+  async deletePromptTemplate(id: string): Promise<void> {
+    await db
+      .delete(promptTemplates)
+      .where(eq(promptTemplates.id, id));
   }
 }
 

@@ -7,7 +7,7 @@ import multer from "multer";
 import XLSX from "xlsx";
 import { randomUUID } from "crypto";
 import { storage } from "./storage";
-import { insertUserSchema, loginUserSchema } from "@shared/schema";
+import { insertUserSchema, loginUserSchema, insertPromptTemplateSchema, type InsertPromptTemplate } from "@shared/schema";
 import { generateCoverLetter, replacePlaceholders } from "./services/gemini";
 
 // Session configuration
@@ -299,6 +299,105 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error updating user session:", error);
       res.status(500).json({ message: "Failed to update user session" });
+    }
+  });
+
+  // Prompt Template Routes
+  app.get('/api/prompt-templates', isAuthenticated, async (req: Request, res: Response) => {
+    try {
+      const userId = (req.session as any).userId;
+      const templates = await storage.getPromptTemplatesByUser(userId);
+      res.json({ templates });
+    } catch (error) {
+      console.error("Error fetching prompt templates:", error);
+      res.status(500).json({ message: "Failed to fetch prompt templates" });
+    }
+  });
+
+  app.post('/api/prompt-templates', isAuthenticated, async (req: Request, res: Response) => {
+    try {
+      const userId = (req.session as any).userId;
+      const { name, template, isDefault } = req.body;
+
+      if (!name || !template) {
+        return res.status(400).json({ message: "Name and template are required" });
+      }
+
+      // If setting as default, unset other defaults first
+      if (isDefault) {
+        const existingTemplates = await storage.getPromptTemplatesByUser(userId);
+        for (const existingTemplate of existingTemplates) {
+          if (existingTemplate.isDefault) {
+            await storage.updatePromptTemplate(existingTemplate.id, { isDefault: false });
+          }
+        }
+      }
+
+      const promptTemplate = await storage.createPromptTemplate({
+        userId,
+        name: name.trim(),
+        template: template.trim(),
+        isDefault: isDefault || false,
+      });
+
+      res.json({ template: promptTemplate });
+    } catch (error) {
+      console.error("Error creating prompt template:", error);
+      res.status(500).json({ message: "Failed to create prompt template" });
+    }
+  });
+
+  app.put('/api/prompt-templates/:id', isAuthenticated, async (req: Request, res: Response) => {
+    try {
+      const userId = (req.session as any).userId;
+      const templateId = req.params.id;
+      const { name, template, isDefault } = req.body;
+
+      // Check if template belongs to user
+      const existingTemplate = await storage.getPromptTemplate(templateId);
+      if (!existingTemplate || existingTemplate.userId !== userId) {
+        return res.status(404).json({ message: "Template not found" });
+      }
+
+      // If setting as default, unset other defaults first
+      if (isDefault) {
+        const userTemplates = await storage.getPromptTemplatesByUser(userId);
+        for (const userTemplate of userTemplates) {
+          if (userTemplate.isDefault && userTemplate.id !== templateId) {
+            await storage.updatePromptTemplate(userTemplate.id, { isDefault: false });
+          }
+        }
+      }
+
+      const updateData: Partial<InsertPromptTemplate> = {};
+      if (name !== undefined) updateData.name = name.trim();
+      if (template !== undefined) updateData.template = template.trim();
+      if (isDefault !== undefined) updateData.isDefault = isDefault;
+
+      const updatedTemplate = await storage.updatePromptTemplate(templateId, updateData);
+      res.json({ template: updatedTemplate });
+    } catch (error) {
+      console.error("Error updating prompt template:", error);
+      res.status(500).json({ message: "Failed to update prompt template" });
+    }
+  });
+
+  app.delete('/api/prompt-templates/:id', isAuthenticated, async (req: Request, res: Response) => {
+    try {
+      const userId = (req.session as any).userId;
+      const templateId = req.params.id;
+
+      // Check if template belongs to user
+      const existingTemplate = await storage.getPromptTemplate(templateId);
+      if (!existingTemplate || existingTemplate.userId !== userId) {
+        return res.status(404).json({ message: "Template not found" });
+      }
+
+      await storage.deletePromptTemplate(templateId);
+      res.json({ message: "Template deleted successfully" });
+    } catch (error) {
+      console.error("Error deleting prompt template:", error);
+      res.status(500).json({ message: "Failed to delete prompt template" });
     }
   });
 
