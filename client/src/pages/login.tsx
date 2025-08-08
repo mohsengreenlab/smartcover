@@ -62,7 +62,10 @@ export default function Login() {
         title: "Success",
         description: "Logged in successfully!",
       });
-      setLocation("/");
+      // Wait a bit for auth state to update, then redirect to home
+      setTimeout(() => {
+        setLocation("/");
+      }, 100);
     } catch (error) {
       toast({
         title: "Error",

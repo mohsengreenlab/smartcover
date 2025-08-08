@@ -41,6 +41,8 @@ export function useAuth() {
       return response.json();
     },
     onSuccess: () => {
+      // Clear the user data immediately
+      queryClient.setQueryData(["/api/auth/user"], null);
       queryClient.invalidateQueries({ queryKey: ["/api/auth/user"] });
     },
   });

@@ -75,8 +75,10 @@ export default function Home() {
         title: "Success",
         description: "Logged out successfully",
       });
-      // Redirect to main page after logout
-      setLocation("/");
+      // Wait a moment for auth state to clear, then redirect
+      setTimeout(() => {
+        setLocation("/");
+      }, 100);
     } catch (error) {
       toast({
         title: "Error",
