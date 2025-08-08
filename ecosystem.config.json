@@ -1,0 +1,25 @@
+{
+  "apps": [{
+    "name": "smartcover-app",
+    "script": "dist/index.js",
+    "cwd": "/home/smartcover/projects/smartcover-app",
+    "env": {
+      "NODE_ENV": "production",
+      "PORT": "3004",
+      "DATABASE_URL": "postgresql://smartcover_user:ywerfewerfeffr@localhost:5432/smartcover_db",
+      "GEMINI_API_KEY": "your_api_key",
+      "SESSION_SECRET": "smartcover_super_secure_session_key_2024_domain_xyz789",
+      "REPL_ID": "smartcover-vps-production",
+      "REPLIT_DOMAINS": "smartcover.kerit.com.ru",
+      "SITE_URL": "https://smartcover.kerit.com.ru",
+      "NODE_TLS_REJECT_UNAUTHORIZED": "0"
+    },
+    "instances": 1,
+    "exec_mode": "fork",
+    "watch": false,
+    "max_memory_restart": "512M",
+    "error_file": "/home/smartcover/logs/smartcover-error.log",
+    "out_file": "/home/smartcover/logs/smartcover-out.log",
+    "log_file": "/home/smartcover/logs/smartcover-combined.log"
+  }]
+}
