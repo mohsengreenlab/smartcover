@@ -44,6 +44,8 @@ const isAuthenticated = (req: Request, res: Response, next: any) => {
 };
 
 export async function registerRoutes(app: Express): Promise<Server> {
+  // Trust proxy for Cloudflare
+  app.set('trust proxy', 1);
   // Session middleware
   app.use(session({
     secret: process.env.SESSION_SECRET || "fallback-session-secret-for-development",
@@ -53,6 +55,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     cookie: {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
+      sameSite: 'lax',
       maxAge: 7 * 24 * 60 * 60 * 1000, // 1 week
     },
   }));
